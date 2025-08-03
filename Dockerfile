@@ -47,4 +47,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Command to run the application
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "prombank.api.main:app", "--host", "0.0.0.0", "--port", "3000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120"]
+CMD ["gunicorn", "src.prombank.api.main:app", "--bind", "0.0.0.0:3000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120"]
