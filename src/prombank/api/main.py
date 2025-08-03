@@ -49,9 +49,9 @@ app.include_router(categories.router, prefix="/api/v1/categories", tags=["catego
 app.include_router(tags.router, prefix="/api/v1/tags", tags=["tags"])
 app.include_router(import_export.router, prefix="/api/v1/import-export", tags=["import-export"])
 
-# Auth routes
-from .routes import auth
-app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+# Auth routes - temporarily disabled until dependencies are resolved
+# from .routes import auth
+# app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
 
 @app.get("/app", response_class=HTMLResponse)

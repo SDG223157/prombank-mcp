@@ -1,4 +1,5 @@
 # Use Python 3.11 slim image
+# Force rebuild: 2025-08-03-02:25 - fixing dependencies
 FROM python:3.11-slim
 
 # Set environment variables
