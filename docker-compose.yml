@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  prombank:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - PROMBANK_DATABASE_URL=mysql+pymysql://mysql:mQ4z935UA5wSTJFubrdLCDLyFRYS50I7yvPjRKvt7UkcfwtiAh8Zk9RuJuOcE66v@toowk4ok4ok0w4sgkgc8wsw0:3306/default
+      - PROMBANK_HOST=0.0.0.0
+      - PROMBANK_PORT=8000
+      - PROMBANK_DEBUG=false
+      - PROMBANK_SECRET_KEY=your-super-secret-key-change-me-in-production-12345
+    volumes:
+      - prombank_data:/app/data
+      - prombank_backups:/app/backups
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  prombank_data:
+  prombank_backups:
