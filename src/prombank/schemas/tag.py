@@ -10,7 +10,7 @@ class TagBase(BaseModel):
     """Base tag schema."""
     name: str = Field(..., min_length=1, max_length=50, description="Tag name")
     description: Optional[str] = Field(None, max_length=500, description="Tag description")
-    color: Optional[str] = Field(None, regex=r'^#[0-9A-Fa-f]{6}$', description="Hex color code")
+    color: Optional[str] = Field(None, pattern=r'^#[0-9A-Fa-f]{6}$', description="Hex color code")
 
 
 class TagCreate(TagBase):
@@ -22,7 +22,7 @@ class TagUpdate(BaseModel):
     """Schema for updating a tag."""
     name: Optional[str] = Field(None, min_length=1, max_length=50)
     description: Optional[str] = Field(None, max_length=500)
-    color: Optional[str] = Field(None, regex=r'^#[0-9A-Fa-f]{6}$')
+    color: Optional[str] = Field(None, pattern=r'^#[0-9A-Fa-f]{6}$')
 
 
 class TagResponse(BaseTimestampModel):
