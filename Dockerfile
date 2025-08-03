@@ -29,7 +29,11 @@ COPY . .
 # Install the package in development mode
 RUN pip install -e .
 
-# Create a non-root user
+# Copy entrypoint script and set permissions (as root)
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Create a non-root user and change ownership
 RUN adduser --disabled-password --gecos '' --shell /bin/bash user \
     && chown -R user:user /app
 USER user
@@ -40,10 +44,6 @@ EXPOSE 3000
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD python -c "import requests; requests.get('http://localhost:3000/health')" || exit 1
-
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 # Command to run the application
 ENTRYPOINT ["/entrypoint.sh"]
