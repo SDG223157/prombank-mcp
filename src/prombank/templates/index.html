@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prombank - Prompt Editor</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">📝 Prombank</h1>
+                <div class="header-actions">
+                    <button id="new-prompt-btn" class="btn btn-primary">
+                        <span class="icon">+</span> New Prompt
+                    </button>
+                    <button id="save-btn" class="btn btn-success" disabled>
+                        <span class="icon">💾</span> Save
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h3>Your Prompts</h3>
+                    <div class="search-box">
+                        <input type="text" id="search-input" placeholder="Search prompts..." autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="prompt-list" id="prompt-list">
+                    <div class="loading">Loading prompts...</div>
+                </div>
+            </aside>
+
+            <!-- Main Editor -->
+            <main class="editor-area">
+                <div class="editor-header">
+                    <input type="text" id="prompt-title" class="title-input" placeholder="Untitled Prompt" autocomplete="off">
+                    <div class="prompt-meta">
+                        <select id="prompt-category" class="meta-select">
+                            <option value="">No Category</option>
+                        </select>
+                        <input type="text" id="prompt-tags" class="tags-input" placeholder="Tags (comma-separated)" autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="editor-content">
+                    <div class="editor-tabs">
+                        <button class="tab-btn active" data-tab="content">Content</button>
+                        <button class="tab-btn" data-tab="description">Description</button>
+                        <button class="tab-btn" data-tab="variables">Variables</button>
+                    </div>
+                    
+                    <div class="tab-content active" id="content-tab">
+                        <textarea id="prompt-content" class="content-editor" placeholder="Enter your prompt content here...
+
+You can use variables like {{variable_name}} in your prompts.
+
+Example:
+Hello {{name}}, please help me with {{task}}."></textarea>
+                    </div>
+                    
+                    <div class="tab-content" id="description-tab">
+                        <textarea id="prompt-description" class="description-editor" placeholder="Describe what this prompt does..."></textarea>
+                    </div>
+                    
+                    <div class="tab-content" id="variables-tab">
+                        <div class="variables-info">
+                            <h4>Template Variables</h4>
+                            <p>Variables found in your prompt content:</p>
+                            <div id="variables-list" class="variables-list">
+                                <p class="no-variables">No variables detected. Use {{variable_name}} syntax in your content.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="editor-footer">
+                    <div class="editor-stats">
+                        <span id="char-count">0 characters</span>
+                        <span id="word-count">0 words</span>
+                        <span id="line-count">0 lines</span>
+                    </div>
+                    <div class="editor-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="is-public">
+                            <span class="checkmark"></span>
+                            Public
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="is-template">
+                            <span class="checkmark"></span>
+                            Template
+                        </label>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <h3>Delete Prompt</h3>
+            <p>Are you sure you want to delete this prompt? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

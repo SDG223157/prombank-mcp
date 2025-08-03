@@ -1,13 +1,22 @@
 """Main FastAPI application."""
 
-from fastapi import FastAPI, Depends, HTTPException, status
+import os
+from pathlib import Path
+from fastapi import FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from ..database import get_db, init_db
 from ..config import settings
 from .routes import prompts, categories, tags, import_export
+
+# Get the base directory for static files and templates
+BASE_DIR = Path(__file__).parent.parent
+STATIC_DIR = BASE_DIR / "static"
+TEMPLATES_DIR = BASE_DIR / "templates"
 
 
 # Create FastAPI app
@@ -18,6 +27,12 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# Setup templates
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+# Mount static files
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 # Add CORS middleware
 app.add_middleware(
@@ -39,21 +54,34 @@ from .routes import auth
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
 
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database on startup."""
-    init_db()
+@app.get("/app", response_class=HTMLResponse)
+async def main_interface(request: Request):
+    """Serve the main prompt management interface."""
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/")
-async def root():
-    """Root endpoint."""
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """Serve the main prompt management interface."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/api", response_model=dict)
+async def api_info():
+    """API information endpoint."""
     return {
         "message": "Prombank MCP API",
         "version": "0.1.0",
         "docs": "/docs",
         "health": "/health",
+        "app": "/app",
     }
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on startup."""
+    init_db()
 
 
 @app.get("/health")
