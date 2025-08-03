@@ -28,6 +28,18 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "your-secret-key-here"
     access_token_expire_minutes: int = 30
+    refresh_token_expire_days: int = 30
+    
+    # Google OAuth
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "https://prombank.app/api/auth/google/callback"
+    
+    # Frontend URL for redirects
+    frontend_url: str = "https://prombank.app"
+    
+    # JWT
+    jwt_algorithm: str = "HS256"
     
     # Pagination
     default_page_size: int = 20

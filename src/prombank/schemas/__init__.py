@@ -4,6 +4,7 @@ from .prompt import *
 from .category import *
 from .tag import *
 from .common import *
+from .auth import *
 
 __all__ = [
     # Prompt schemas
@@ -22,6 +23,17 @@ __all__ = [
     "TagCreate",
     "TagUpdate", 
     "TagResponse",
+    
+    # Auth schemas
+    "UserCreate",
+    "UserUpdate",
+    "UserResponse",
+    "TokenResponse",
+    "TokenData",
+    "GoogleAuthRequest",
+    "GoogleUserInfo",
+    "RefreshTokenRequest",
+    "LogoutRequest",
     
     # Common schemas
     "PaginationParams",

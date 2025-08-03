@@ -2,6 +2,7 @@
 
 from .base import Base
 from .prompt import Prompt, PromptTag, PromptCategory, PromptVersion
+from .user import User, UserSession, UserRole
 
 __all__ = [
     "Base",
@@ -9,4 +10,7 @@ __all__ = [
     "PromptTag",
     "PromptCategory",
     "PromptVersion",
+    "User",
+    "UserSession", 
+    "UserRole",
 ]
