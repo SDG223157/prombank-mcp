@@ -128,24 +128,30 @@ class PromptManager {
             return;
         }
         
-        this.elements.promptList.innerHTML = promptsToShow.map(prompt => `
-            <div class="prompt-item ${this.currentPrompt?.id === prompt.id ? 'active' : ''}" 
-                 data-id="${prompt.id}">
-                <div class="prompt-item-title">${this.escapeHtml(prompt.title)}</div>
-                <div class="prompt-item-meta">
-                    <span>${prompt.category || 'No category'}</span>
-                    <span>${prompt.tags?.join(', ') || 'No tags'}</span>
+        this.elements.promptList.innerHTML = promptsToShow.map(prompt => {
+            // Handle tags properly - they might be objects or strings
+            const tagNames = prompt.tags?.map(tag => typeof tag === 'string' ? tag : tag.name) || [];
+            const tagsDisplay = tagNames.length > 0 ? tagNames.join(', ') : 'No tags';
+            
+            return `
+                <div class="prompt-item ${this.currentPrompt?.id === prompt.id ? 'active' : ''}" 
+                     data-id="${prompt.id}">
+                    <div class="prompt-item-title">${this.escapeHtml(prompt.title)}</div>
+                    <div class="prompt-item-meta">
+                        <span>${prompt.category || 'No category'}</span>
+                        <span>${tagsDisplay}</span>
+                    </div>
+                    <div class="prompt-item-actions">
+                        <button class="btn btn-small btn-secondary" onclick="app.loadPrompt(${prompt.id})">
+                            📝 Edit
+                        </button>
+                        <button class="btn btn-small btn-danger" onclick="app.deletePrompt(${prompt.id})">
+                            🗑️
+                        </button>
+                    </div>
                 </div>
-                <div class="prompt-item-actions">
-                    <button class="btn btn-small btn-secondary" onclick="app.loadPrompt(${prompt.id})">
-                        📝 Edit
-                    </button>
-                    <button class="btn btn-small btn-danger" onclick="app.deletePrompt(${prompt.id})">
-                        🗑️
-                    </button>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
         
         // Bind click events
         this.elements.promptList.querySelectorAll('.prompt-item').forEach(item => {
@@ -174,6 +180,7 @@ class PromptManager {
             if (!response.ok) throw new Error('Failed to fetch prompt');
             
             const prompt = await response.json();
+            console.log('Loaded prompt data:', prompt); // Debug logging
             this.currentPrompt = prompt;
             this.populateEditor(prompt);
             this.updateActivePromptInList();
@@ -190,7 +197,11 @@ class PromptManager {
         this.elements.promptContent.value = prompt.content || '';
         this.elements.promptDescription.value = prompt.description || '';
         this.elements.promptCategory.value = prompt.category_id || '';
-        this.elements.promptTags.value = prompt.tags?.join(', ') || '';
+        
+        // Handle tags - they come as objects with 'name' field
+        const tagNames = prompt.tags?.map(tag => typeof tag === 'string' ? tag : tag.name) || [];
+        this.elements.promptTags.value = tagNames.join(', ');
+        
         this.elements.isPublic.checked = prompt.is_public || false;
         this.elements.isTemplate.checked = prompt.is_template || false;
         
@@ -307,11 +318,21 @@ class PromptManager {
             return;
         }
         
-        const filtered = this.prompts.filter(prompt => 
-            prompt.title.toLowerCase().includes(query.toLowerCase()) ||
-            prompt.content.toLowerCase().includes(query.toLowerCase()) ||
-            prompt.tags?.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-        );
+        const filtered = this.prompts.filter(prompt => {
+            const title = prompt.title?.toLowerCase() || '';
+            const content = prompt.content?.toLowerCase() || '';
+            const queryLower = query.toLowerCase();
+            
+            // Handle tags properly - they might be objects or strings
+            const tagNames = prompt.tags?.map(tag => typeof tag === 'string' ? tag : tag.name) || [];
+            const tagsMatch = tagNames.some(tagName => 
+                tagName?.toLowerCase().includes(queryLower)
+            );
+            
+            return title.includes(queryLower) || 
+                   content.includes(queryLower) || 
+                   tagsMatch;
+        });
         
         this.renderPromptList(filtered);
     }
