@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    
+    - name: Initialize database
+      run: |
+        prombank init
+    
+    - name: Test CLI
+      run: |
+        prombank --help
+        prombank prompt --help
+    
+    - name: Test import functionality
+      run: |
+        echo '{"title": "Test Prompt", "content": "Test content"}' > test_prompt.json
+        prombank import file test_prompt.json --format json
+    
+    - name: Test API health
+      run: |
+        prombank server &
+        sleep 10
+        curl -f http://localhost:8000/health || exit 1
+        pkill -f "prombank server"
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: |
+        docker build -t prombank-mcp:test .
+    
+    - name: Test Docker image
+      run: |
+        docker run --rm -d --name prombank-test -p 8000:8000 \
+          -e PROMBANK_DATABASE_URL=sqlite:///./test.db \
+          prombank-mcp:test
+        sleep 30
+        curl -f http://localhost:8000/health || exit 1
+        docker stop prombank-test
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort mypy
+        pip install -r requirements.txt
+    
+    - name: Lint with flake8
+      run: |
+        flake8 src/prombank --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/prombank --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Check code formatting with black
+      run: |
+        black --check src/prombank
+    
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only src/prombank

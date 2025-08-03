@@ -51,9 +51,9 @@ prombank-server = "prombank.server:run_server"
 prombank-mcp = "prombank.mcp_server:main"
 
 [project.urls]
-Homepage = "https://github.com/SDG223157/prompt-house-premium"
-Repository = "https://github.com/SDG223157/prompt-house-premium"
-Issues = "https://github.com/SDG223157/prompt-house-premium/issues"
+Homepage = "https://github.com/SDG223157/prombank-mcp"
+Repository = "https://github.com/SDG223157/prombank-mcp"
+Issues = "https://github.com/SDG223157/prombank-mcp/issues"
 
 [tool.setuptools]
 packages = ["prombank"]

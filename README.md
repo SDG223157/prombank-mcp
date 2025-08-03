@@ -1,5 +1,11 @@
 # Prombank MCP
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
+[![MCP](https://img.shields.io/badge/MCP-compatible-purple.svg)](https://modelcontextprotocol.io/)
+
 A comprehensive prompt management system with MCP (Model Context Protocol) server capabilities for seamless integration with AI tools like Cursor.
 
 ## Features
@@ -41,8 +47,8 @@ A comprehensive prompt management system with MCP (Model Context Protocol) serve
 
 ```bash
 # Clone the repository
-git clone https://github.com/SDG223157/prompt-house-premium
-cd prompt-house-premium
+git clone https://github.com/SDG223157/prombank-mcp
+cd prombank-mcp
 
 # Install dependencies
 pip install -r requirements.txt
@@ -210,8 +216,8 @@ The system uses SQLAlchemy with the following main models:
 
 ```bash
 # Clone repository
-git clone https://github.com/SDG223157/prompt-house-premium
-cd prompt-house-premium
+git clone https://github.com/SDG223157/prombank-mcp
+cd prombank-mcp
 
 # Create virtual environment
 python -m venv venv
@@ -291,8 +297,8 @@ MIT License - see LICENSE file for details.
 
 ## Support
 
-- GitHub Issues: [Report bugs or request features](https://github.com/SDG223157/prompt-house-premium/issues)
-- Documentation: [Full documentation](https://github.com/SDG223157/prompt-house-premium/wiki)
+- GitHub Issues: [Report bugs or request features](https://github.com/SDG223157/prombank-mcp/issues)
+- Documentation: [Full documentation](https://github.com/SDG223157/prombank-mcp/wiki)
 
 ## Changelog
 
