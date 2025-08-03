@@ -45,9 +45,46 @@ class Settings(BaseSettings):
     default_page_size: int = 20
     max_page_size: int = 100
     
+    # Logging
+    log_level: str = "info"
+    log_format: str = "json"
+    log_file: str = "/app/logs/prombank.log"
+    
+    # CORS Configuration
+    allowed_origins: str = "https://prombank.app,https://www.prombank.app"
+    allowed_methods: str = "GET,POST,PUT,DELETE,OPTIONS"
+    allowed_headers: str = "*"
+    allow_credentials: bool = True
+    
+    # Rate Limiting
+    rate_limit_enabled: bool = True
+    rate_limit_requests: int = 100
+    rate_limit_window: int = 3600
+    
+    # Health Check
+    health_check_enabled: bool = True
+    health_check_path: str = "/health"
+    
+    # MCP Server
+    mcp_server_name: str = "prombank-mcp"
+    mcp_server_version: str = "1.0.0"
+    
+    # Legacy environment variables (for backwards compatibility)
+    app_port: Optional[int] = None
+    environment: Optional[str] = None
+    
+    # Coolify-specific variables (will be ignored but won't cause errors)
+    source_commit: Optional[str] = None
+    coolify_url: Optional[str] = None
+    coolify_fqdn: Optional[str] = None
+    coolify_branch: Optional[str] = None
+    coolify_resource_uuid: Optional[str] = None
+    coolify_container_name: Optional[str] = None
+    
     class Config:
         env_file = ".env"
         env_prefix = "PROMBANK_"
+        extra = "ignore"  # Ignore extra environment variables
 
 
 # Global settings instance
