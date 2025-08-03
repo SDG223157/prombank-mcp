@@ -35,11 +35,11 @@ RUN adduser --disabled-password --gecos '' --shell /bin/bash user \
 USER user
 
 # Expose the port the app runs on
-EXPOSE 8000
+EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health')" || exit 1
+    CMD python -c "import requests; requests.get('http://localhost:3000/health')" || exit 1
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
@@ -47,4 +47,4 @@ RUN chmod +x /entrypoint.sh
 
 # Command to run the application
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["gunicorn", "prombank.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120"]
+CMD ["gunicorn", "prombank.api.main:app", "--host", "0.0.0.0", "--port", "3000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120"]

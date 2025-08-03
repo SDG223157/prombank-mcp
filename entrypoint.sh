@@ -46,4 +46,8 @@ print('Database initialization complete!')
 mkdir -p /app/data /app/backups
 
 echo "Starting application..."
+# Use PORT environment variable if available, default to 3000
+PORT=${PORT:-3000}
+export PORT
+
 exec "$@"
