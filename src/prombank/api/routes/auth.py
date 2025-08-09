@@ -85,13 +85,9 @@ async def google_callback(
         ip_address=ip_address
     )
     
-    return TokenResponse(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        token_type="bearer",
-        expires_in=settings.access_token_expire_minutes * 60,
-        user=UserResponse.from_orm(user)
-    )
+    # For web flow, redirect to dashboard with token in URL (you should use cookies in production)
+    dashboard_url = f"{settings.frontend_url}/dashboard?access_token={access_token}"
+    return RedirectResponse(url=dashboard_url, status_code=302)
 
 
 @router.post("/token", response_model=TokenResponse)

@@ -49,9 +49,9 @@ app.include_router(categories.router, prefix="/api/v1/categories", tags=["catego
 app.include_router(tags.router, prefix="/api/v1/tags", tags=["tags"])
 app.include_router(import_export.router, prefix="/api/v1/import-export", tags=["import-export"])
 
-# Auth routes - temporarily disabled until dependencies are resolved
-# from .routes import auth
-# app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+# Auth routes
+from .routes import auth
+app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 
 
 @app.get("/app", response_class=HTMLResponse)
@@ -60,10 +60,16 @@ async def main_interface(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    """Serve the main prompt management interface (alias for /app)."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    """Serve the main prompt management interface."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    """Serve the login page."""
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 @app.get("/api", response_model=dict)
