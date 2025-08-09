@@ -2,6 +2,7 @@
 
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import Response, PlainTextResponse
 from sqlalchemy.orm import Session
 
 from ...database import get_db
@@ -154,6 +155,45 @@ async def get_prompt(
             detail="Prompt not found"
         )
     return prompt
+
+
+@router.get("/{prompt_id}/raw")
+async def get_prompt_raw(
+    prompt_id: int,
+    include_metadata: bool = Query(False, description="Include title/description as Markdown"),
+    download: bool = Query(False, description="Force download instead of inline view"),
+    service: PromptService = Depends(get_prompt_service)
+):
+    """Return the prompt content as plain text (or Markdown if including metadata).
+
+    This is useful for a Notepad/TextEdit-style view or direct download.
+    """
+    prompt = service.get_prompt(prompt_id)
+    if not prompt:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prompt not found"
+        )
+
+    if include_metadata:
+        body = []
+        if prompt.title:
+            body.append(f"# {prompt.title}")
+        if prompt.description:
+            body.append("")
+            body.append(prompt.description)
+        body.append("")
+        body.append(prompt.content or "")
+        text = "\n".join(body)
+        headers = {}
+        if download:
+            headers["Content-Disposition"] = f"attachment; filename=prompt_{prompt_id}.md"
+        return Response(content=text, media_type="text/markdown", headers=headers)
+    else:
+        headers = {}
+        if download:
+            headers["Content-Disposition"] = f"attachment; filename=prompt_{prompt_id}.txt"
+        return PlainTextResponse(content=prompt.content or "", headers=headers)
 
 
 @router.put("/{prompt_id}", response_model=PromptResponse)
