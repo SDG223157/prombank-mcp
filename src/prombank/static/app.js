@@ -142,6 +142,9 @@ class PromptManager {
                         <span>${tagsDisplay}</span>
                     </div>
                     <div class="prompt-item-actions">
+                        <button class="btn btn-small btn-primary" onclick="window.open('/api/v1/prompts/${prompt.id}/raw?include_metadata=true', '_blank')">
+                            👁️ View
+                        </button>
                         <button class="btn btn-small btn-secondary" onclick="app.loadPrompt(${prompt.id})">
                             📝 Edit
                         </button>
