@@ -1,15 +1,15 @@
 """User authentication models."""
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum as PyEnum
 from typing import Optional
-from sqlalchemy import Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, DateTime, String, Text, Enum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
 
-class UserRole(str, Enum):
+class UserRole(str, PyEnum):
     """User role enumeration."""
     USER = "user"
     ADMIN = "admin"
@@ -33,7 +33,7 @@ class User(Base):
     # Account status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    role: Mapped[UserRole] = mapped_column(String(20), default=UserRole.USER)
+    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
     
     # OAuth details
     provider: Mapped[Optional[str]] = mapped_column(String(50), default="google")
