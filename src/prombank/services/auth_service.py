@@ -208,7 +208,7 @@ class AuthService:
             scope="openid email profile"
         )
         
-        authorization_url, _ = oauth.authorization_url(
+        authorization_url, state = oauth.create_authorization_url(
             "https://accounts.google.com/o/oauth2/auth",
             state=state,
             access_type="offline",
