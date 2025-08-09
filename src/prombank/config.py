@@ -33,10 +33,10 @@ class Settings(BaseSettings):
     # Google OAuth
     google_client_id: str = ""
     google_client_secret: str = ""
-    google_redirect_uri: str = "https://prombank.app/api/auth/google/callback"
+    google_redirect_uri: str = "https://prombank-mcp.com/api/auth/google/callback"
     
     # Frontend URL for redirects
-    frontend_url: str = "https://prombank.app"
+    frontend_url: str = "https://prombank-mcp.com"
     
     # JWT
     jwt_algorithm: str = "HS256"
