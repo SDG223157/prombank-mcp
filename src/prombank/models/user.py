@@ -33,7 +33,7 @@ class User(Base):
     # Account status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole), default=UserRole.USER)
+    role: Mapped[str] = mapped_column(String(20), default=UserRole.USER.value)
     
     # OAuth details
     provider: Mapped[Optional[str]] = mapped_column(String(50), default="google")

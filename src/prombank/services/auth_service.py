@@ -86,7 +86,7 @@ class AuthService:
         to_encode = {
             "sub": str(user.id),
             "email": user.email,
-            "role": user.role if isinstance(user.role, str) else user.role.value,
+            "role": user.role,
             "exp": expire,
             "iat": datetime.utcnow(),
             "type": "access"
