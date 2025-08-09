@@ -43,8 +43,8 @@ class User(Base):
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     email_verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     
-    # Relationships
-    api_tokens: Mapped[list["APIToken"]] = relationship("APIToken", back_populates="user", cascade="all, delete-orphan")
+    # Relationships  
+    # api_tokens: Mapped[list["APIToken"]] = relationship("APIToken", back_populates="user", cascade="all, delete-orphan", lazy="select")
     
     def __repr__(self) -> str:
         return f"<User(email='{self.email}', role='{self.role}')>"

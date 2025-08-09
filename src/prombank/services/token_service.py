@@ -6,6 +6,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from ..models.token import APIToken
+from ..models.user import User
 
 
 class TokenService:
@@ -76,8 +77,8 @@ class TokenService:
         self.db.commit()
         return True
     
-    def verify_token(self, token_value: str) -> Optional[APIToken]:
-        """Verify a token and return the associated token record."""
+    def verify_token(self, token_value: str) -> Optional[dict]:
+        """Verify a token and return the associated token record with user info."""
         token_hash = self._hash_token(token_value)
         
         token = self.db.query(APIToken).filter(
@@ -89,8 +90,16 @@ class TokenService:
             # Update last used timestamp
             token.last_used_at = datetime.utcnow()
             self.db.commit()
+            
+            # Get associated user
+            user = self.db.query(User).filter(User.id == token.user_id).first()
+            
+            return {
+                "token": token,
+                "user": user
+            }
         
-        return token
+        return None
     
     def _hash_token(self, token_value: str) -> str:
         """Hash a token value for storage."""

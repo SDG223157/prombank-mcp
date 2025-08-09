@@ -20,7 +20,7 @@ class APIToken(Base):
     
     # User relationship
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    user: Mapped["User"] = relationship("User", back_populates="api_tokens")
+    # user: Mapped["User"] = relationship("User", back_populates="api_tokens")
     
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
