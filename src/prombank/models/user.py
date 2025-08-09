@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum as PyEnum
 from typing import Optional
 from sqlalchemy import Boolean, DateTime, String, Text, Enum
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
 
@@ -42,6 +42,9 @@ class User(Base):
     # Timestamps
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
     email_verified_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
+    
+    # Relationships
+    api_tokens: Mapped[list["APIToken"]] = relationship("APIToken", back_populates="user", cascade="all, delete-orphan")
     
     def __repr__(self) -> str:
         return f"<User(email='{self.email}', role='{self.role}')>"

@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db, init_db
 from ..config import settings
-from .routes import prompts, categories, tags, import_export
+from .routes import prompts, categories, tags, import_export, tokens
 
 # Get the base directory for static files and templates
 BASE_DIR = Path(__file__).parent.parent
@@ -48,6 +48,7 @@ app.include_router(prompts.router, prefix="/api/v1/prompts", tags=["prompts"])
 app.include_router(categories.router, prefix="/api/v1/categories", tags=["categories"])
 app.include_router(tags.router, prefix="/api/v1/tags", tags=["tags"])
 app.include_router(import_export.router, prefix="/api/v1/import-export", tags=["import-export"])
+app.include_router(tokens.router, prefix="/api/v1/tokens", tags=["tokens"])
 
 # Auth routes
 from .routes import auth

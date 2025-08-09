@@ -65,6 +65,14 @@ class PromptManager {
         // Delete confirmation
         this.elements.confirmDelete.addEventListener('click', () => this.deleteConfirmed());
         
+        // User profile actions
+        document.getElementById('manage-tokens-btn')?.addEventListener('click', () => this.showTokenModal());
+        document.getElementById('logout-btn')?.addEventListener('click', () => this.logout());
+        
+        // Token management
+        document.getElementById('generate-token-btn')?.addEventListener('click', () => this.generateToken());
+        document.getElementById('copy-token-btn')?.addEventListener('click', () => this.copyToken());
+        
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
         
@@ -76,7 +84,8 @@ class PromptManager {
         try {
             await Promise.all([
                 this.loadPrompts(),
-                this.loadCategories()
+                this.loadCategories(),
+                this.loadUserProfile()
             ]);
         } catch (error) {
             console.error('Failed to load initial data:', error);
@@ -432,7 +441,10 @@ class PromptManager {
     }
     
     showModal(modalId) {
-        document.getElementById(modalId).classList.add('active');
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('active');
+        }
     }
     
     closeModal(modalId) {
@@ -489,6 +501,215 @@ class PromptManager {
             "'": '&#039;'
         };
         return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // User Profile Methods
+    async loadUserProfile() {
+        try {
+            // Check if we have access token in URL (from OAuth redirect)
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = urlParams.get('access_token');
+            
+            if (accessToken) {
+                // Store token and clean URL
+                localStorage.setItem('auth_token', accessToken);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                // No token, redirect to login
+                window.location.href = '/';
+                return;
+            }
+
+            // Get user profile from token
+            const userData = this.parseJWT(token);
+            if (!userData) {
+                this.logout();
+                return;
+            }
+
+            // Display user profile
+            this.displayUserProfile(userData);
+            
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+            this.logout();
+        }
+    }
+
+    parseJWT(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error('Error parsing JWT:', error);
+            return null;
+        }
+    }
+
+    displayUserProfile(userData) {
+        const userProfile = document.getElementById('user-profile');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userEmail = document.getElementById('user-email');
+
+        if (userProfile && userName && userEmail) {
+            userName.textContent = userData.name || userData.email.split('@')[0];
+            userEmail.textContent = userData.email;
+            
+            // Set avatar if available (from Google OAuth)
+            if (userAvatar && userData.picture) {
+                userAvatar.src = userData.picture;
+            } else if (userAvatar) {
+                // Default avatar
+                userAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.email)}&background=3b82f6&color=fff`;
+            }
+
+            userProfile.style.display = 'block';
+        }
+    }
+
+    // Token Management Methods
+    showTokenModal() {
+        const modal = document.getElementById('token-modal');
+        if (modal) {
+            modal.classList.add('active');
+            this.loadTokens();
+        }
+    }
+
+    async loadTokens() {
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await fetch('/api/v1/tokens', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                const tokens = await response.json();
+                this.displayTokens(tokens);
+            }
+        } catch (error) {
+            console.error('Error loading tokens:', error);
+            document.getElementById('tokens-list').innerHTML = '<div class="error">Failed to load tokens</div>';
+        }
+    }
+
+    displayTokens(tokens) {
+        const tokensList = document.getElementById('tokens-list');
+        if (!tokensList) return;
+
+        if (tokens.length === 0) {
+            tokensList.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No tokens created yet.</p>';
+            return;
+        }
+
+        tokensList.innerHTML = tokens.map(token => `
+            <div class="token-item">
+                <div class="token-info">
+                    <h5>${this.escapeHtml(token.name)}</h5>
+                    <p>Created: ${new Date(token.created_at).toLocaleDateString()}</p>
+                </div>
+                <div class="token-actions">
+                    <button class="btn btn-small btn-danger" onclick="app.deleteToken('${token.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async generateToken() {
+        const tokenName = document.getElementById('token-name');
+        const name = tokenName?.value.trim();
+        
+        if (!name) {
+            this.showError('Please enter a token name');
+            return;
+        }
+
+        try {
+            const authToken = localStorage.getItem('auth_token');
+            const response = await fetch('/api/v1/tokens', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({ name })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.showGeneratedToken(result.token);
+                tokenName.value = '';
+                this.loadTokens(); // Refresh the list
+            } else {
+                const error = await response.json();
+                this.showError(error.detail || 'Failed to generate token');
+            }
+        } catch (error) {
+            console.error('Error generating token:', error);
+            this.showError('Failed to generate token');
+        }
+    }
+
+    showGeneratedToken(token) {
+        const tokenDisplay = document.getElementById('token-display');
+        const generatedToken = document.getElementById('generated-token');
+        
+        if (tokenDisplay && generatedToken) {
+            generatedToken.textContent = token;
+            tokenDisplay.style.display = 'block';
+        }
+    }
+
+    copyToken() {
+        const generatedToken = document.getElementById('generated-token');
+        if (generatedToken) {
+            navigator.clipboard.writeText(generatedToken.textContent).then(() => {
+                this.showSuccess('Token copied to clipboard!');
+            }).catch(() => {
+                this.showError('Failed to copy token');
+            });
+        }
+    }
+
+    async deleteToken(tokenId) {
+        if (!confirm('Are you sure you want to delete this token? This action cannot be undone.')) {
+            return;
+        }
+
+        try {
+            const authToken = localStorage.getItem('auth_token');
+            const response = await fetch(`/api/v1/tokens/${tokenId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+
+            if (response.ok) {
+                this.showSuccess('Token deleted successfully');
+                this.loadTokens(); // Refresh the list
+            } else {
+                this.showError('Failed to delete token');
+            }
+        } catch (error) {
+            console.error('Error deleting token:', error);
+            this.showError('Failed to delete token');
+        }
+    }
+
+    logout() {
+        localStorage.removeItem('auth_token');
+        window.location.href = '/';
     }
 }
 

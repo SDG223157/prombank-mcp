@@ -37,6 +37,37 @@
                 <div class="prompt-list" id="prompt-list">
                     <div class="loading">Loading prompts...</div>
                 </div>
+                
+                <!-- User Profile Section -->
+                <div class="user-profile" id="user-profile" style="display: none;">
+                    <div class="profile-header">
+                        <img id="user-avatar" src="" alt="User" class="profile-avatar">
+                        <div class="profile-info">
+                            <div id="user-name" class="profile-name"></div>
+                            <div id="user-email" class="profile-email"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- MCP Integration Section -->
+                    <div class="mcp-section">
+                        <div class="mcp-header">
+                            <span class="mcp-icon">🔌</span>
+                            <h4>Connect to Cursor IDE</h4>
+                        </div>
+                        <p class="mcp-description">Access your prompts directly in Cursor IDE with our Model Context Protocol (MCP) integration.</p>
+                        
+                        <button class="btn btn-primary btn-full" id="manage-tokens-btn">
+                            🔑 Manage API Tokens
+                        </button>
+                        <p class="mcp-helper">Generate secure tokens for MCP connection</p>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <button class="btn btn-secondary btn-small" id="logout-btn">
+                            🚪 Logout
+                        </button>
+                    </div>
+                </div>
             </aside>
 
             <!-- Main Editor -->
@@ -113,6 +144,66 @@ Hello {{name}}, please help me with {{task}}."></textarea>
             <div class="modal-actions">
                 <button class="btn btn-secondary" onclick="closeModal('delete-modal')">Cancel</button>
                 <button class="btn btn-danger" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Token Management Modal -->
+    <div id="token-modal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h3>🔑 API Token Management</h3>
+                <button class="modal-close" onclick="closeModal('token-modal')">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="token-section">
+                    <h4>Generate New Token</h4>
+                    <p>Create a secure token for MCP connection to Cursor IDE.</p>
+                    
+                    <div class="token-form">
+                        <input type="text" id="token-name" placeholder="Token name (e.g., 'Cursor IDE')" class="token-input">
+                        <button class="btn btn-primary" id="generate-token-btn">Generate Token</button>
+                    </div>
+                </div>
+                
+                <div class="token-display" id="token-display" style="display: none;">
+                    <h4>🎉 Token Generated Successfully!</h4>
+                    <p class="token-warning">⚠️ Copy this token now - it won't be shown again!</p>
+                    <div class="token-box">
+                        <code id="generated-token"></code>
+                        <button class="btn btn-small btn-secondary" id="copy-token-btn">📋 Copy</button>
+                    </div>
+                </div>
+                
+                <div class="existing-tokens">
+                    <h4>Existing Tokens</h4>
+                    <div id="tokens-list" class="tokens-list">
+                        <div class="loading">Loading tokens...</div>
+                    </div>
+                </div>
+                
+                <div class="mcp-setup">
+                    <h4>Setup Instructions for Cursor IDE</h4>
+                    <ol class="setup-steps">
+                        <li>Generate a token above</li>
+                        <li>Copy the token to your clipboard</li>
+                        <li>In Cursor IDE, go to Settings → Extensions → MCP</li>
+                        <li>Add server configuration:
+                            <pre class="code-block">{
+  "mcpServers": {
+    "prombank": {
+      "command": "prombank-mcp",
+      "args": ["--token", "YOUR_TOKEN_HERE"],
+      "env": {
+        "PROMBANK_API_URL": "<span id="api-url-placeholder">https://prombank-mcp.com</span>"
+      }
+    }
+  }
+}</pre>
+                        </li>
+                    </ol>
+                </div>
             </div>
         </div>
     </div>
