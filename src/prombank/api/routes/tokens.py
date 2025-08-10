@@ -187,7 +187,7 @@ async def create_token_simple():
     return {"message": "Simple endpoint on main route works"}
 
 
-@router.get("/")
+@router.get("/list")
 async def get_user_tokens(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
