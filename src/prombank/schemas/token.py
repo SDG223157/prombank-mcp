@@ -13,7 +13,7 @@ class TokenCreate(BaseModel):
 
 class TokenResponse(BaseModel):
     """Schema for token response."""
-    id: str
+    id: int
     name: str
     description: Optional[str]
     token: Optional[str] = None  # Only included when creating a new token

@@ -62,7 +62,7 @@ class TokenService:
             for token in tokens
         ]
     
-    def delete_token(self, token_id: str, user_id: int) -> bool:
+    def delete_token(self, token_id: int, user_id: int) -> bool:
         """Delete a token (soft delete)."""
         token = self.db.query(APIToken).filter(
             APIToken.id == token_id,

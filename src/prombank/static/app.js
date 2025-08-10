@@ -619,7 +619,7 @@ class PromptManager {
                     <p>Created: ${new Date(token.created_at).toLocaleDateString()}</p>
                 </div>
                 <div class="token-actions">
-                    <button class="btn btn-small btn-danger" onclick="app.deleteToken('${token.id}')">Delete</button>
+                    <button class="btn btn-small btn-danger" onclick="app.deleteToken(${token.id})">Delete</button>
                 </div>
             </div>
         `).join('');

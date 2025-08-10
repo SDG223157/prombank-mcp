@@ -50,7 +50,7 @@ async def get_user_tokens(
 
 @router.delete("/{token_id}")
 async def delete_token(
-    token_id: str,
+    token_id: int,
     current_user: User = Depends(get_current_user),
     service: TokenService = Depends(get_token_service)
 ):
