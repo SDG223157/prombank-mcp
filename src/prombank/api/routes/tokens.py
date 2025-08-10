@@ -48,10 +48,21 @@ async def token_with_body(token_data: TokenCreate):
 
 
 @router.post("/with-db")
-async def token_with_db(service: TokenService = Depends(get_token_service)):
+async def token_with_db(db: Session = Depends(get_db)):
     """Token endpoint with only database dependency."""
     print("🔥 Database dependency endpoint reached!")
-    return {"message": "Database service works!", "timestamp": "2025-08-09"}
+    try:
+        # Try to import and create TokenService manually
+        from ...services.token_service import TokenService
+        print("🔥 TokenService imported successfully!")
+        service = TokenService(db)
+        print("🔥 TokenService created successfully!")
+        return {"message": "Database service works!", "timestamp": "2025-08-09"}
+    except Exception as e:
+        print(f"❌ Error with TokenService: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {"error": f"TokenService error: {str(e)}", "timestamp": "2025-08-09"}
 
 
 @router.post("/combined")
