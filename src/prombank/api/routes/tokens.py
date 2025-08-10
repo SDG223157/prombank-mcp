@@ -76,6 +76,37 @@ async def token_combined(
     return {"message": f"All dependencies work! User: {current_user.id}, Token: {token_data.name}", "timestamp": "2025-08-09"}
 
 
+@router.post("/test-service")
+async def test_service_creation(
+    token_data: TokenCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Test TokenService creation and method call without commits."""
+    print(f"🔥 Test service endpoint reached! User: {current_user.id}, Token: {token_data.name}")
+    try:
+        from ...services.token_service import TokenService
+        print("✅ TokenService imported")
+        
+        service = TokenService(db)
+        print("✅ TokenService created")
+        
+        # Test the method call but catch any errors
+        result = service.create_token(
+            user_id=current_user.id,
+            name=token_data.name,
+            description=token_data.description
+        )
+        print("✅ create_token method completed")
+        return {"message": "Service method works!", "result": str(result), "timestamp": "2025-08-09"}
+        
+    except Exception as e:
+        print(f"❌ Error in service test: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {"error": f"Service error: {str(e)}", "timestamp": "2025-08-09"}
+
+
 @router.get("/debug/db")
 async def test_database():
     """Test database connectivity for tokens."""
