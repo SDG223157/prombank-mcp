@@ -95,7 +95,7 @@ class PromptManager {
     
     async loadPrompts() {
         try {
-            const response = await fetch('/api/v1/prompts?limit=100');
+            const response = await fetch(`https://${window.location.host}/api/v1/prompts?limit=100`);
             if (!response.ok) throw new Error('Failed to fetch prompts');
             
             const data = await response.json();
@@ -114,7 +114,7 @@ class PromptManager {
     
     async loadCategories() {
         try {
-            const response = await fetch('/api/v1/categories');
+            const response = await fetch(`https://${window.location.host}/api/v1/categories`);
             if (!response.ok) throw new Error('Failed to fetch categories');
             
             const data = await response.json();
@@ -188,7 +188,7 @@ class PromptManager {
     
     async loadPrompt(promptId) {
         try {
-            const response = await fetch(`/api/v1/prompts/${promptId}`);
+            const response = await fetch(`https://${window.location.host}/api/v1/prompts/${promptId}`);
             if (!response.ok) throw new Error('Failed to fetch prompt');
             
             const prompt = await response.json();
@@ -258,14 +258,14 @@ class PromptManager {
             let response;
             if (this.currentPrompt?.id) {
                 // Update existing prompt
-                response = await fetch(`/api/v1/prompts/${this.currentPrompt.id}`, {
+                response = await fetch(`https://${window.location.host}/api/v1/prompts/${this.currentPrompt.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(promptData)
                 });
             } else {
                 // Create new prompt
-                response = await fetch('/api/v1/prompts', {
+                response = await fetch(`https://${window.location.host}/api/v1/prompts`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(promptData)
@@ -301,7 +301,7 @@ class PromptManager {
         if (!this.deletePromptId) return;
         
         try {
-            const response = await fetch(`/api/v1/prompts/${this.deletePromptId}`, {
+            const response = await fetch(`https://${window.location.host}/api/v1/prompts/${this.deletePromptId}`, {
                 method: 'DELETE'
             });
             
