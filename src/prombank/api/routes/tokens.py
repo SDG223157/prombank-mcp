@@ -24,7 +24,7 @@ def get_token_service(db: Session = Depends(get_db)) -> TokenService:
     return TokenService(db)
 
 
-@router.post("/", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_token(
     token_data: TokenCreate,
     current_user: User = Depends(get_current_user),
@@ -50,7 +50,7 @@ async def create_token(
         )
 
 
-@router.get("/", response_model=List[TokenResponse])
+@router.get("/")
 async def get_user_tokens(
     current_user: User = Depends(get_current_user),
     service: TokenService = Depends(get_token_service)
@@ -60,7 +60,11 @@ async def get_user_tokens(
         print(f"📋 Loading tokens for user {current_user.id}")
         tokens = service.get_user_tokens(current_user.id)
         print(f"✅ Found {len(tokens)} tokens")
-        return tokens
+        # Return structure matching working implementation
+        return {
+            "tokens": tokens,
+            "count": len(tokens)
+        }
     except Exception as e:
         print(f"❌ Error loading tokens: {str(e)}")
         import traceback

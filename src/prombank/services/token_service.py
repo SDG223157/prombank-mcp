@@ -17,8 +17,11 @@ class TokenService:
     
     def create_token(self, user_id: int, name: str, description: Optional[str] = None) -> dict:
         """Create a new API token for a user."""
-        # Generate a secure token
-        token_value = f"pb_{secrets.token_urlsafe(32)}"
+        # Generate a secure token (match working implementation format)
+        import secrets
+        prefix = secrets.token_hex(4)
+        random_part = secrets.token_hex(20)
+        token_value = f"{prefix}_{random_part}"
         
         # Create token record
         api_token = APIToken(
@@ -34,14 +37,19 @@ class TokenService:
         self.db.commit()
         self.db.refresh(api_token)
         
-        # Return the response with the plaintext token (only shown once)
+        # Return response matching working implementation structure
         return {
-            "id": api_token.id,
-            "name": api_token.name,
-            "description": api_token.description,
-            "token": token_value,  # Only shown during creation
-            "created_at": api_token.created_at,
-            "last_used_at": api_token.last_used_at
+            "message": "API token created successfully",
+            "token": {
+                "id": api_token.id,
+                "name": api_token.name,
+                "description": api_token.description,
+                "accessLink": token_value,  # This is the key field the frontend expects
+                "preview": f"{token_value[:12]}...",
+                "created_at": api_token.created_at,
+                "last_used_at": api_token.last_used_at
+            },
+            "warning": "Save this token securely - it cannot be viewed again!"
         }
     
     def get_user_tokens(self, user_id: int) -> List[dict]:

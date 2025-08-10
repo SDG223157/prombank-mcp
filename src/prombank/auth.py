@@ -26,10 +26,9 @@ def get_token_service(db: Session = Depends(get_db)) -> TokenService:
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
-    auth_service: AuthService = Depends(get_auth_service),
-    token_service: TokenService = Depends(get_token_service)
+    auth_service: AuthService = Depends(get_auth_service)
 ) -> User:
-    """Get current authenticated user (supports both JWT and API tokens)."""
+    """Get current authenticated user."""
     
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,24 +36,12 @@ def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     
-    token = credentials.credentials
+    token_data = auth_service.verify_token(credentials.credentials)
     
-    # Check if it's an API token (starts with 'pb_')
-    if token.startswith('pb_'):
-        token_data = token_service.verify_token(token)
-        if token_data and token_data.get('user'):
-            user = token_data['user']
-            if user and user.is_active:
-                return user
+    if token_data is None or token_data.user_id is None:
         raise credentials_exception
     
-    # Otherwise, treat as JWT token
-    jwt_token_data = auth_service.verify_token(token)
-    
-    if jwt_token_data is None or jwt_token_data.user_id is None:
-        raise credentials_exception
-    
-    user = auth_service.get_user_by_id(jwt_token_data.user_id)
+    user = auth_service.get_user_by_id(token_data.user_id)
     
     if user is None:
         raise credentials_exception

@@ -612,9 +612,10 @@ class PromptManager {
             console.log('📡 Response status:', response.status);
             
             if (response.ok) {
-                const tokens = await response.json();
-                console.log('✅ Tokens loaded:', tokens);
-                this.displayTokens(tokens);
+                const data = await response.json();
+                console.log('✅ Tokens loaded:', data);
+                // Handle response structure: { tokens: [...], count: N }
+                this.displayTokens(data.tokens || []);
             } else {
                 const errorText = await response.text();
                 console.error('❌ Failed to load tokens:', response.status, errorText);
@@ -687,7 +688,8 @@ class PromptManager {
             if (response.ok) {
                 const result = await response.json();
                 console.log('✅ Token generated successfully:', result);
-                this.showGeneratedToken(result.token);
+                // Match working implementation: result.token.accessLink
+                this.showGeneratedToken(result.token.accessLink);
                 tokenName.value = '';
                 this.loadTokens(); // Refresh the list
             } else {
