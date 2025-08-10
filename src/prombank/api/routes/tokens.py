@@ -19,6 +19,44 @@ async def test_endpoint():
     return {"message": "Tokens API is working!", "timestamp": "2025-08-09"}
 
 
+@router.get("/debug/db")
+async def test_database():
+    """Test database connectivity for tokens."""
+    try:
+        from ...database import get_db
+        from ...models.token import APIToken
+        db = next(get_db())
+        
+        # Test if we can query the APIToken table
+        count = db.query(APIToken).count()
+        
+        return {
+            "database": "connected",
+            "api_tokens_table": "exists",
+            "token_count": count,
+            "message": "Database connectivity test passed"
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "database": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+            "message": "Database connectivity test failed"
+        }
+
+
+@router.get("/debug/auth")
+async def test_auth(current_user: User = Depends(get_current_user)):
+    """Test authentication for tokens API."""
+    return {
+        "authenticated": True,
+        "user_id": current_user.id,
+        "user_email": current_user.email,
+        "message": "Authentication test passed"
+    }
+
+
 def get_token_service(db: Session = Depends(get_db)) -> TokenService:
     """Get token service instance."""
     return TokenService(db)
