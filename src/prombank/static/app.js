@@ -602,7 +602,7 @@ class PromptManager {
             }
 
                     console.log('🔗 Making request to /api/v1/tokens/list');
-        const response = await fetch(`https://${window.location.host}/api/v1/tokens/list`, {
+        const response = await fetch(`https://${window.location.host}/api/v1/tokens/list?v=${Date.now()}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -674,7 +674,7 @@ class PromptManager {
             }
 
             console.log('🚀 Making POST request to /api/v1/tokens/create'); // Force cache refresh v2
-            const response = await fetch(`https://${window.location.host}/api/v1/tokens/create`, {
+            const response = await fetch(`https://${window.location.host}/api/v1/tokens/create?v=${Date.now()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
