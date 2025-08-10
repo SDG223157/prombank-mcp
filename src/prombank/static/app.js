@@ -717,6 +717,23 @@ class PromptManager {
         if (tokenDisplay && generatedToken) {
             generatedToken.textContent = token;
             tokenDisplay.style.display = 'block';
+            
+            // Update the configuration with the actual token
+            const codeBlock = document.querySelector('.code-block');
+            if (codeBlock) {
+                const configText = `{
+  "mcpServers": {
+    "prombank": {
+      "command": "prombank-mcp",
+      "args": ["--token", "${token}"],
+      "env": {
+        "PROMBANK_API_URL": "https://prombank-mcp.com"
+      }
+    }
+  }
+}`;
+                codeBlock.innerHTML = configText + '<br><br><button class="btn btn-small btn-success copy-config-btn" onclick="app.copyConfiguration(\'' + token + '\')">📋 Copy Configuration</button>';
+            }
         }
     }
 
@@ -729,6 +746,25 @@ class PromptManager {
                 this.showError('Failed to copy token');
             });
         }
+    }
+
+    copyConfiguration(token) {
+        const configText = `{
+  "mcpServers": {
+    "prombank": {
+      "command": "prombank-mcp",
+      "args": ["--token", "${token}"],
+      "env": {
+        "PROMBANK_API_URL": "https://prombank-mcp.com"
+      }
+    }
+  }
+}`;
+        navigator.clipboard.writeText(configText).then(() => {
+            this.showSuccess('Configuration copied to clipboard!');
+        }).catch(() => {
+            this.showError('Failed to copy configuration');
+        });
     }
 
     async deleteToken(tokenId) {
