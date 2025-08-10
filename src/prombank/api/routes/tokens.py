@@ -159,20 +159,19 @@ async def create_token(
     """Create a new API token."""
     print(f"🔥 POST /tokens endpoint reached! User: {current_user.id if current_user else 'None'}")
     try:
-        # Import and create service manually
         from ...services.token_service import TokenService
-        print("🔥 TokenService imported in main endpoint!")
-        service = TokenService(db)
-        print("🔥 TokenService created in main endpoint!")
+        print("✅ TokenService imported in main endpoint")
         
-        print(f"🔑 Creating token for user {current_user.id}: {token_data.name}")
-        token = service.create_token(
+        service = TokenService(db)
+        print("✅ TokenService created in main endpoint")
+        
+        result = service.create_token(
             user_id=current_user.id,
             name=token_data.name,
             description=token_data.description
         )
-        print(f"✅ Token created successfully: {token['id']}")
-        return token
+        print("✅ create_token method completed in main endpoint")
+        return result
     except Exception as e:
         print(f"❌ Error creating token: {str(e)}")
         import traceback
