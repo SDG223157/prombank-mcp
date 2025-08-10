@@ -577,29 +577,53 @@ class PromptManager {
 
     // Token Management Methods
     showTokenModal() {
+        console.log('🔑 Opening token modal...');
         const modal = document.getElementById('token-modal');
         if (modal) {
             modal.classList.add('active');
+            console.log('✅ Modal opened, loading tokens...');
             this.loadTokens();
+        } else {
+            console.error('❌ Token modal not found!');
+            this.showError('Token modal not found');
         }
     }
 
     async loadTokens() {
+        console.log('📋 Loading tokens...');
         try {
             const token = localStorage.getItem('auth_token');
+            console.log('🎫 Auth token found:', token ? `${token.substring(0, 20)}...` : 'NONE');
+            
+            if (!token) {
+                console.error('❌ No auth token found');
+                this.showError('Please login first');
+                return;
+            }
+
+            console.log('🔗 Making request to /api/v1/tokens');
             const response = await fetch('/api/v1/tokens', {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
 
+            console.log('📡 Response status:', response.status);
+            
             if (response.ok) {
                 const tokens = await response.json();
+                console.log('✅ Tokens loaded:', tokens);
                 this.displayTokens(tokens);
+            } else {
+                const errorText = await response.text();
+                console.error('❌ Failed to load tokens:', response.status, errorText);
+                this.showError(`Failed to load tokens: ${response.status}`);
             }
         } catch (error) {
-            console.error('Error loading tokens:', error);
+            console.error('💥 Error loading tokens:', error);
             document.getElementById('tokens-list').innerHTML = '<div class="error">Failed to load tokens</div>';
+            this.showError('Network error loading tokens');
         }
     }
 
@@ -626,16 +650,29 @@ class PromptManager {
     }
 
     async generateToken() {
+        console.log('🔑 Generating new token...');
         const tokenName = document.getElementById('token-name');
         const name = tokenName?.value.trim();
         
+        console.log('📝 Token name:', name);
+        
         if (!name) {
+            console.error('❌ No token name provided');
             this.showError('Please enter a token name');
             return;
         }
 
         try {
             const authToken = localStorage.getItem('auth_token');
+            console.log('🎫 Using auth token:', authToken ? `${authToken.substring(0, 20)}...` : 'NONE');
+            
+            if (!authToken) {
+                console.error('❌ No auth token found');
+                this.showError('Please login first');
+                return;
+            }
+
+            console.log('🚀 Making POST request to /api/v1/tokens');
             const response = await fetch('/api/v1/tokens', {
                 method: 'POST',
                 headers: {
@@ -645,18 +682,29 @@ class PromptManager {
                 body: JSON.stringify({ name })
             });
 
+            console.log('📡 Generate response status:', response.status);
+
             if (response.ok) {
                 const result = await response.json();
+                console.log('✅ Token generated successfully:', result);
                 this.showGeneratedToken(result.token);
                 tokenName.value = '';
                 this.loadTokens(); // Refresh the list
             } else {
-                const error = await response.json();
-                this.showError(error.detail || 'Failed to generate token');
+                const errorText = await response.text();
+                console.error('❌ Failed to generate token:', response.status, errorText);
+                let errorMessage;
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    errorMessage = errorJson.detail || 'Failed to generate token';
+                } catch {
+                    errorMessage = `Failed to generate token (${response.status})`;
+                }
+                this.showError(errorMessage);
             }
         } catch (error) {
-            console.error('Error generating token:', error);
-            this.showError('Failed to generate token');
+            console.error('💥 Error generating token:', error);
+            this.showError('Network error generating token');
         }
     }
 
