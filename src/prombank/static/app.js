@@ -602,7 +602,7 @@ class PromptManager {
             }
 
             console.log('🔗 Making request to /api/v1/tokens');
-            const response = await fetch('/api/v1/tokens', {
+            const response = await fetch(`${window.location.protocol}//${window.location.host}/api/v1/tokens`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -674,7 +674,7 @@ class PromptManager {
             }
 
             console.log('🚀 Making POST request to /api/v1/tokens');
-            const response = await fetch('/api/v1/tokens', {
+            const response = await fetch(`${window.location.protocol}//${window.location.host}/api/v1/tokens`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -738,7 +738,7 @@ class PromptManager {
 
         try {
             const authToken = localStorage.getItem('auth_token');
-            const response = await fetch(`/api/v1/tokens/${tokenId}`, {
+            const response = await fetch(`${window.location.protocol}//${window.location.host}/api/v1/tokens/${tokenId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${authToken}`
