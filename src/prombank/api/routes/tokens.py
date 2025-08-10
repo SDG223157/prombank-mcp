@@ -150,41 +150,34 @@ async def test_auth(current_user: User = Depends(get_current_user)):
 #     return TokenService(db)
 
 
-@router.post("/create")
-async def create_token_working(
+@router.post("/create", status_code=status.HTTP_201_CREATED)
+async def create_token(
     token_data: TokenCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Create a new API token (working copy)."""
-    print(f"🔥 Test service endpoint reached! User: {current_user.id}, Token: {token_data.name}")
+    """Create a new API token."""
+    print(f"🔑 Creating token for user {current_user.id}: {token_data.name}")
     try:
         from ...services.token_service import TokenService
-        print("✅ TokenService imported")
-        
         service = TokenService(db)
-        print("✅ TokenService created")
         
-        # Test the method call but catch any errors
         result = service.create_token(
             user_id=current_user.id,
             name=token_data.name,
             description=token_data.description
         )
-        print("✅ create_token method completed")
+        print(f"✅ Token created successfully")
         return result
         
     except Exception as e:
-        print(f"❌ Error in service test: {str(e)}")
+        print(f"❌ Error creating token: {str(e)}")
         import traceback
         traceback.print_exc()
-        return {"error": f"Service error: {str(e)}", "timestamp": "2025-08-09"}
-
-
-@router.post("/working")
-async def create_token_working_route():
-    """Test a completely different route path."""
-    return {"message": "Working route endpoint works"}
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Failed to create token: {str(e)}"
+        )
 
 
 @router.get("/list")

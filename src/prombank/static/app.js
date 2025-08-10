@@ -601,8 +601,8 @@ class PromptManager {
                 return;
             }
 
-            console.log('🔗 Making request to /api/v1/tokens');
-            const response = await fetch(`https://${window.location.host}/api/v1/tokens`, {
+                    console.log('🔗 Making request to /api/v1/tokens/list');
+        const response = await fetch(`https://${window.location.host}/api/v1/tokens/list`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -674,7 +674,7 @@ class PromptManager {
             }
 
             console.log('🚀 Making POST request to /api/v1/tokens');
-            const response = await fetch(`https://${window.location.host}/api/v1/tokens`, {
+            const response = await fetch(`https://${window.location.host}/api/v1/tokens/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
