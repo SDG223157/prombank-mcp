@@ -150,36 +150,41 @@ async def test_auth(current_user: User = Depends(get_current_user)):
 #     return TokenService(db)
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_token(
+@router.post("/create")
+async def create_token_working(
     token_data: TokenCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Create a new API token."""
-    print(f"🔥 POST /tokens endpoint reached! User: {current_user.id if current_user else 'None'}")
+    """Create a new API token (working copy)."""
+    print(f"🔥 Test service endpoint reached! User: {current_user.id}, Token: {token_data.name}")
     try:
         from ...services.token_service import TokenService
-        print("✅ TokenService imported in main endpoint")
+        print("✅ TokenService imported")
         
         service = TokenService(db)
-        print("✅ TokenService created in main endpoint")
+        print("✅ TokenService created")
         
+        # Test the method call but catch any errors
         result = service.create_token(
             user_id=current_user.id,
             name=token_data.name,
             description=token_data.description
         )
-        print("✅ create_token method completed in main endpoint")
+        print("✅ create_token method completed")
         return result
+        
     except Exception as e:
-        print(f"❌ Error creating token: {str(e)}")
+        print(f"❌ Error in service test: {str(e)}")
         import traceback
         traceback.print_exc()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to create token: {str(e)}"
-        )
+        return {"error": f"Service error: {str(e)}", "timestamp": "2025-08-09"}
+
+
+@router.post("/", status_code=status.HTTP_201_CREATED)
+async def create_token_simple():
+    """Temporary simple endpoint."""
+    return {"message": "Simple endpoint on main route works"}
 
 
 @router.get("/")
