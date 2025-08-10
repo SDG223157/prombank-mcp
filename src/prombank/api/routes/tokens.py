@@ -19,6 +19,13 @@ async def test_endpoint():
     return {"message": "Tokens API is working!", "timestamp": "2025-08-09"}
 
 
+@router.post("/test")
+async def test_post_endpoint():
+    """Test POST endpoint to verify POST requests work."""
+    print("🔥 POST test endpoint reached!")
+    return {"message": "POST request successful!", "timestamp": "2025-08-09"}
+
+
 @router.get("/debug/db")
 async def test_database():
     """Test database connectivity for tokens."""
@@ -69,6 +76,7 @@ async def create_token(
     service: TokenService = Depends(get_token_service)
 ):
     """Create a new API token."""
+    print(f"🔥 POST /tokens endpoint reached! User: {current_user.id if current_user else 'None'}")
     try:
         print(f"🔑 Creating token for user {current_user.id}: {token_data.name}")
         token = service.create_token(
