@@ -26,6 +26,27 @@ async def test_post_endpoint():
     return {"message": "POST request successful!", "timestamp": "2025-08-09"}
 
 
+@router.post("/simple")
+async def simple_token_endpoint():
+    """Simplified token endpoint without dependencies."""
+    print("🔥 Simple token endpoint reached!")
+    return {"message": "Simple endpoint works!", "timestamp": "2025-08-09"}
+
+
+@router.post("/with-auth")
+async def token_with_auth(current_user: User = Depends(get_current_user)):
+    """Token endpoint with only auth dependency."""
+    print(f"🔥 Auth-only endpoint reached! User: {current_user.id}")
+    return {"message": f"Auth works for user {current_user.id}!", "timestamp": "2025-08-09"}
+
+
+@router.post("/with-body")
+async def token_with_body(token_data: TokenCreate):
+    """Token endpoint with only body validation."""
+    print(f"🔥 Body-only endpoint reached! Name: {token_data.name}")
+    return {"message": f"Body validation works for {token_data.name}!", "timestamp": "2025-08-09"}
+
+
 @router.get("/debug/db")
 async def test_database():
     """Test database connectivity for tokens."""
