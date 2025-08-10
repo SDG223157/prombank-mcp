@@ -673,7 +673,7 @@ class PromptManager {
                 return;
             }
 
-            console.log('🚀 Making POST request to /api/v1/tokens');
+            console.log('🚀 Making POST request to /api/v1/tokens/create');
             const response = await fetch(`https://${window.location.host}/api/v1/tokens/create`, {
                 method: 'POST',
                 headers: {
