@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from ...database import get_db
 from ...auth import get_current_user
 from ...models.user import User
-from ...services.token_service import TokenService
+# from ...services.token_service import TokenService  # Temporarily commented out
 from ...schemas.token import TokenCreate, TokenResponse
 
 router = APIRouter()
@@ -69,7 +69,7 @@ async def token_with_db(db: Session = Depends(get_db)):
 async def token_combined(
     token_data: TokenCreate,
     current_user: User = Depends(get_current_user),
-    service: TokenService = Depends(get_token_service)
+    db: Session = Depends(get_db)
 ):
     """Token endpoint with all dependencies except the actual service call."""
     print(f"🔥 Combined endpoint reached! User: {current_user.id}, Token: {token_data.name}")
@@ -114,20 +114,26 @@ async def test_auth(current_user: User = Depends(get_current_user)):
     }
 
 
-def get_token_service(db: Session = Depends(get_db)) -> TokenService:
-    """Get token service instance."""
-    return TokenService(db)
+# def get_token_service(db: Session = Depends(get_db)) -> TokenService:
+#     """Get token service instance."""
+#     return TokenService(db)
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_token(
     token_data: TokenCreate,
     current_user: User = Depends(get_current_user),
-    service: TokenService = Depends(get_token_service)
+    db: Session = Depends(get_db)
 ):
     """Create a new API token."""
     print(f"🔥 POST /tokens endpoint reached! User: {current_user.id if current_user else 'None'}")
     try:
+        # Import and create service manually
+        from ...services.token_service import TokenService
+        print("🔥 TokenService imported in main endpoint!")
+        service = TokenService(db)
+        print("🔥 TokenService created in main endpoint!")
+        
         print(f"🔑 Creating token for user {current_user.id}: {token_data.name}")
         token = service.create_token(
             user_id=current_user.id,
@@ -149,10 +155,13 @@ async def create_token(
 @router.get("/")
 async def get_user_tokens(
     current_user: User = Depends(get_current_user),
-    service: TokenService = Depends(get_token_service)
+    db: Session = Depends(get_db)
 ):
     """Get all tokens for the current user."""
     try:
+        from ...services.token_service import TokenService
+        service = TokenService(db)
+        
         print(f"📋 Loading tokens for user {current_user.id}")
         tokens = service.get_user_tokens(current_user.id)
         print(f"✅ Found {len(tokens)} tokens")
@@ -175,9 +184,12 @@ async def get_user_tokens(
 async def delete_token(
     token_id: int,
     current_user: User = Depends(get_current_user),
-    service: TokenService = Depends(get_token_service)
+    db: Session = Depends(get_db)
 ):
     """Delete a token."""
+    from ...services.token_service import TokenService
+    service = TokenService(db)
+    
     success = service.delete_token(token_id, current_user.id)
     if not success:
         raise HTTPException(
