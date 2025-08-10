@@ -47,6 +47,24 @@ async def token_with_body(token_data: TokenCreate):
     return {"message": f"Body validation works for {token_data.name}!", "timestamp": "2025-08-09"}
 
 
+@router.post("/with-db")
+async def token_with_db(service: TokenService = Depends(get_token_service)):
+    """Token endpoint with only database dependency."""
+    print("🔥 Database dependency endpoint reached!")
+    return {"message": "Database service works!", "timestamp": "2025-08-09"}
+
+
+@router.post("/combined")
+async def token_combined(
+    token_data: TokenCreate,
+    current_user: User = Depends(get_current_user),
+    service: TokenService = Depends(get_token_service)
+):
+    """Token endpoint with all dependencies except the actual service call."""
+    print(f"🔥 Combined endpoint reached! User: {current_user.id}, Token: {token_data.name}")
+    return {"message": f"All dependencies work! User: {current_user.id}, Token: {token_data.name}", "timestamp": "2025-08-09"}
+
+
 @router.get("/debug/db")
 async def test_database():
     """Test database connectivity for tokens."""
