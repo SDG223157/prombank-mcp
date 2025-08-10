@@ -181,10 +181,10 @@ async def create_token_working(
         return {"error": f"Service error: {str(e)}", "timestamp": "2025-08-09"}
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
-async def create_token_simple():
-    """Temporary simple endpoint."""
-    return {"message": "Simple endpoint on main route works"}
+@router.post("/working")
+async def create_token_working_route():
+    """Test a completely different route path."""
+    return {"message": "Working route endpoint works"}
 
 
 @router.get("/list")
