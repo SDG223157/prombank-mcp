@@ -49,9 +49,8 @@ async def list_tools() -> List[Tool]:
                         "description": "Filter by category name (optional)"
                     },
                     "tags": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "Filter by tag names (optional)"
+                        "type": "string",
+                        "description": "Filter by tags (comma-separated, optional)"
                     },
                     "limit": {
                         "type": "integer",
@@ -78,7 +77,7 @@ async def list_tools() -> List[Tool]:
         ),
         Tool(
             name="create_prompt",
-            description="Create a new prompt",
+            description="Create a new prompt with title, content, and metadata",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -88,7 +87,7 @@ async def list_tools() -> List[Tool]:
                     },
                     "content": {
                         "type": "string", 
-                        "description": "Content of the prompt"
+                        "description": "The prompt content with variables in {{variable}} format"
                     },
                     "description": {
                         "type": "string",
@@ -96,21 +95,15 @@ async def list_tools() -> List[Tool]:
                     },
                     "category": {
                         "type": "string",
-                        "description": "Category name (optional)"
+                        "description": "Category of the prompt (optional)"
                     },
                     "tags": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "List of tag names (optional)"
+                        "type": "string",
+                        "description": "Comma-separated tags (optional)"
                     },
                     "is_public": {
                         "type": "boolean",
-                        "description": "Whether the prompt is public (default: false)",
-                        "default": False
-                    },
-                    "is_template": {
-                        "type": "boolean", 
-                        "description": "Whether the prompt is a template (default: false)",
+                        "description": "Whether the prompt should be public",
                         "default": False
                     }
                 },
@@ -125,7 +118,7 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "prompt_id": {
                         "type": "integer",
-                        "description": "ID of the prompt to update"
+                        "description": "The ID of the prompt to update"
                     },
                     "title": {
                         "type": "string",
@@ -141,20 +134,39 @@ async def list_tools() -> List[Tool]:
                     },
                     "category": {
                         "type": "string",
-                        "description": "New category name (optional)"
+                        "description": "New category (optional)"
                     },
                     "tags": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "New list of tag names (optional)"
+                        "type": "string",
+                        "description": "New comma-separated tags (optional)"
                     },
-                    "create_version": {
+                    "is_public": {
                         "type": "boolean",
-                        "description": "Create new version on update (default: false)",
-                        "default": False
+                        "description": "Whether the prompt should be public (optional)"
                     }
                 },
                 "required": ["prompt_id"]
+            }
+        ),
+        Tool(
+            name="list_templates",
+            description="Get available prompt templates",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "description": "Filter by category (optional)"
+                    }
+                }
+            }
+        ),
+        Tool(
+            name="get_user_info",
+            description="Get user information and statistics",
+            inputSchema={
+                "type": "object",
+                "properties": {}
             }
         ),
         Tool(
@@ -165,128 +177,37 @@ async def list_tools() -> List[Tool]:
                 "properties": {
                     "prompt_id": {
                         "type": "integer",
-                        "description": "ID of the prompt to delete"
+                        "description": "The ID of the prompt to delete"
                     }
                 },
                 "required": ["prompt_id"]
             }
         ),
         Tool(
-            name="list_categories", 
-            description="List all available categories",
+            name="bulk_import",
+            description="Bulk import prompts from Fabric patterns or markdown files",
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "active_only": {
-                        "type": "boolean",
-                        "description": "Only return active categories (default: true)",
-                        "default": True
-                    }
-                }
-            }
-        ),
-        Tool(
-            name="list_tags",
-            description="List all available tags or search tags",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "search": {
+                    "source_type": {
                         "type": "string",
-                        "description": "Search query for tags (optional)"
+                        "enum": ["fabric", "markdown"],
+                        "description": "Type of source files to import"
                     },
-                    "popular": {
-                        "type": "boolean", 
-                        "description": "Get popular tags with usage counts (default: false)",
-                        "default": False
-                    },
-                    "limit": {
-                        "type": "integer",
-                        "description": "Maximum number of results (default: 20)",
-                        "default": 20
-                    }
-                }
-            }
-        ),
-        Tool(
-            name="import_prompts",
-            description="Import prompts from text content",
-            inputSchema={
-                "type": "object",
-                "properties": {
                     "content": {
                         "type": "string",
-                        "description": "Content to import"
+                        "description": "Content to import (for single file import)"
                     },
-                    "format_type": {
+                    "pattern": {
                         "type": "string",
-                        "enum": ["json", "markdown", "yaml", "fabric"],
-                        "description": "Format of the content (default: markdown)",
-                        "default": "markdown"
-                    },
-                    "title": {
-                        "type": "string", 
-                        "description": "Title for single prompt import (optional)"
+                        "description": "Optional pattern to filter files (e.g., 'analyze_*')"
                     },
                     "category": {
                         "type": "string",
                         "description": "Default category for imported prompts (optional)"
                     }
                 },
-                "required": ["content"]
-            }
-        ),
-        Tool(
-            name="export_prompts",
-            description="Export prompts in specified format",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "format_type": {
-                        "type": "string",
-                        "enum": ["json", "markdown", "yaml", "csv"],
-                        "description": "Export format (default: json)",
-                        "default": "json"
-                    },
-                    "prompt_ids": {
-                        "type": "array",
-                        "items": {"type": "integer"},
-                        "description": "Specific prompt IDs to export (optional, exports all if not provided)"
-                    },
-                    "include_metadata": {
-                        "type": "boolean",
-                        "description": "Include metadata in export (default: true)",
-                        "default": True
-                    }
-                }
-            }
-        ),
-        Tool(
-            name="get_popular_prompts",
-            description="Get most frequently used prompts",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "description": "Maximum number of results (default: 10)",
-                        "default": 10
-                    }
-                }
-            }
-        ),
-        Tool(
-            name="get_recent_prompts", 
-            description="Get recently created prompts",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "limit": {
-                        "type": "integer",
-                        "description": "Maximum number of results (default: 10)",
-                        "default": 10
-                    }
-                }
+                "required": ["source_type"]
             }
         )
     ]
@@ -310,18 +231,12 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
             return await _update_prompt(db, arguments)
         elif name == "delete_prompt":
             return await _delete_prompt(db, arguments)
-        elif name == "list_categories":
-            return await _list_categories(db, arguments)
-        elif name == "list_tags":
-            return await _list_tags(db, arguments)
-        elif name == "import_prompts":
-            return await _import_prompts(db, arguments)
-        elif name == "export_prompts":
-            return await _export_prompts(db, arguments)
-        elif name == "get_popular_prompts":
-            return await _get_popular_prompts(db, arguments)
-        elif name == "get_recent_prompts":
-            return await _get_recent_prompts(db, arguments)
+        elif name == "list_templates":
+            return await _list_templates(db, arguments)
+        elif name == "get_user_info":
+            return await _get_user_info(db, arguments)
+        elif name == "bulk_import":
+            return await _bulk_import(db, arguments)
         else:
             return [TextContent(type="text", text=f"Unknown tool: {name}")]
     
@@ -336,383 +251,403 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
 # Tool Implementation Functions
 
 async def _search_prompts(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Search for prompts."""
-    service = PromptService(db)
-    
+    """Search for prompts by title, content, or tags."""
     query = arguments.get("query", "")
     category = arguments.get("category")
     tags = arguments.get("tags")
     limit = arguments.get("limit", 10)
     
-    # Get category ID if category name provided
-    category_id = None
-    if category:
-        cat_service = CategoryService(db)
-        cat_obj = cat_service.get_category_by_name(category)
-        category_id = cat_obj.id if cat_obj else None
-    
-    prompts, total = service.get_prompts(
-        limit=limit,
-        search=query,
-        category_id=category_id,
-        tags=tags,
-        status=PromptStatus.ACTIVE,
-    )
-    
-    if not prompts:
-        return [TextContent(type="text", text=f"No prompts found for query: '{query}'")]
-    
-    result = [f"Found {len(prompts)} prompts (total: {total}):\n"]
-    for i, prompt in enumerate(prompts, 1):
-        category_name = prompt.category.name if prompt.category else "None"
-        tag_names = ", ".join(tag.name for tag in prompt.tags) if prompt.tags else "None"
+    try:
+        prompt_service = PromptService(db)
         
-        result.append(
-            f"{i}. **{prompt.title}** (ID: {prompt.id})\n"
-            f"   Type: {prompt.prompt_type.value} | Category: {category_name} | Tags: {tag_names}\n"
-            f"   Usage: {prompt.usage_count} times | Created: {prompt.created_at.strftime('%Y-%m-%d')}\n"
-            f"   Description: {prompt.description or 'No description'}\n"
+        # Convert tag string to list if provided
+        tag_list = None
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(",")]
+        
+        # Search prompts
+        prompts = prompt_service.search_prompts(
+            query=query,
+            category_name=category,
+            tag_names=tag_list,
+            limit=limit
         )
-    
-    return [TextContent(type="text", text="\n".join(result))]
+        
+        results = []
+        for prompt in prompts:
+            results.append({
+                "id": prompt.id,
+                "title": prompt.title,
+                "description": prompt.description,
+                "category": prompt.category.name if prompt.category else None,
+                "tags": [tag.name for tag in prompt.tags] if prompt.tags else [],
+                "is_public": prompt.is_public,
+                "updated_at": prompt.updated_at.isoformat() if prompt.updated_at else None,
+                "preview": prompt.content[:200] + "..." if len(prompt.content) > 200 else prompt.content
+            })
+        
+        return [TextContent(
+            type="text",
+            text=json.dumps({
+                "results": results,
+                "count": len(results),
+                "query": query
+            }, indent=2)
+        )]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"Search error: {str(e)}")]
 
 
 async def _get_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
     """Get a specific prompt by ID."""
-    service = PromptService(db)
     prompt_id = arguments.get("prompt_id")
     
     if not prompt_id:
         return [TextContent(type="text", text="Error: prompt_id is required")]
     
-    prompt = service.get_prompt(prompt_id)
-    if not prompt:
-        return [TextContent(type="text", text=f"Prompt with ID {prompt_id} not found")]
-    
-    # Record usage
-    service.use_prompt(prompt_id)
-    
-    category_name = prompt.category.name if prompt.category else "None"
-    tag_names = ", ".join(tag.name for tag in prompt.tags) if prompt.tags else "None"
-    
-    result = [
-        f"**{prompt.title}** (ID: {prompt.id})\n",
-        f"Type: {prompt.prompt_type.value}",
-        f"Status: {prompt.status.value}",
-        f"Category: {category_name}",
-        f"Tags: {tag_names}",
-        f"Version: {prompt.version}",
-        f"Usage Count: {prompt.usage_count}",
-        f"Public: {'Yes' if prompt.is_public else 'No'}",
-        f"Template: {'Yes' if prompt.is_template else 'No'}",
-        f"Created: {prompt.created_at.strftime('%Y-%m-%d %H:%M')}",
-        f"Updated: {prompt.updated_at.strftime('%Y-%m-%d %H:%M')}",
-        f"\n**Description:**\n{prompt.description or 'No description'}",
-        f"\n**Content:**\n{prompt.content}"
-    ]
-    
-    return [TextContent(type="text", text="\n".join(result))]
-
-
-async def _create_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Create a new prompt."""
-    service = PromptService(db)
-    
-    title = arguments.get("title")
-    content = arguments.get("content") 
-    description = arguments.get("description")
-    category = arguments.get("category")
-    tags = arguments.get("tags", [])
-    is_public = arguments.get("is_public", False)
-    is_template = arguments.get("is_template", False)
-    
-    if not title or not content:
-        return [TextContent(type="text", text="Error: title and content are required")]
-    
-    # Get or create category
-    category_id = None
-    if category:
-        cat_service = CategoryService(db)
-        cat_obj = cat_service.get_category_by_name(category)
-        if not cat_obj:
-            cat_obj = cat_service.create_category(category)
-        category_id = cat_obj.id
-    
     try:
-        prompt = service.create_prompt(
-            title=title,
-            content=content,
-            description=description,
-            category_id=category_id,
-            tags=tags,
-            is_public=is_public,
-            is_template=is_template,
-        )
-        
-        return [TextContent(
-            type="text", 
-            text=f"Successfully created prompt '{title}' with ID {prompt.id}"
-        )]
-    
-    except Exception as e:
-        return [TextContent(type="text", text=f"Error creating prompt: {str(e)}")]
-
-
-async def _update_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Update an existing prompt."""
-    service = PromptService(db)
-    
-    prompt_id = arguments.get("prompt_id")
-    if not prompt_id:
-        return [TextContent(type="text", text="Error: prompt_id is required")]
-    
-    # Get category ID if category name provided
-    category_id = None
-    category = arguments.get("category")
-    if category:
-        cat_service = CategoryService(db)
-        cat_obj = cat_service.get_category_by_name(category)
-        if not cat_obj:
-            cat_obj = cat_service.create_category(category)
-        category_id = cat_obj.id
-    
-    try:
-        prompt = service.update_prompt(
-            prompt_id=prompt_id,
-            title=arguments.get("title"),
-            content=arguments.get("content"),
-            description=arguments.get("description"),
-            category_id=category_id,
-            tags=arguments.get("tags"),
-            create_version=arguments.get("create_version", False),
-        )
+        prompt_service = PromptService(db)
+        prompt = prompt_service.get_prompt(prompt_id)
         
         if not prompt:
             return [TextContent(type="text", text=f"Prompt with ID {prompt_id} not found")]
         
-        return [TextContent(
-            type="text",
-            text=f"Successfully updated prompt '{prompt.title}' (ID: {prompt.id})"
-        )]
-    
+        # Extract variables from content
+        variables = _extract_variables(prompt.content)
+        
+        result = {
+            "id": prompt.id,
+            "title": prompt.title,
+            "description": prompt.description,
+            "content": prompt.content,
+            "category": prompt.category.name if prompt.category else None,
+            "tags": [tag.name for tag in prompt.tags] if prompt.tags else [],
+            "is_public": prompt.is_public,
+            "variables": variables,
+            "statistics": {
+                "characters": len(prompt.content),
+                "words": len(prompt.content.split()) if prompt.content else 0,
+                "estimated_tokens": len(prompt.content) // 4 if prompt.content else 0
+            },
+            "created_at": prompt.created_at.isoformat() if prompt.created_at else None,
+            "updated_at": prompt.updated_at.isoformat() if prompt.updated_at else None
+        }
+        
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
     except Exception as e:
-        return [TextContent(type="text", text=f"Error updating prompt: {str(e)}")]
+        return [TextContent(type="text", text=f"Get prompt error: {str(e)}")]
 
 
-async def _delete_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Delete a prompt."""
-    service = PromptService(db)
+async def _create_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
+    """Create a new prompt."""
+    title = arguments.get("title")
+    content = arguments.get("content")
+    description = arguments.get("description")
+    category = arguments.get("category")
+    tags = arguments.get("tags")
+    is_public = arguments.get("is_public", False)
     
+    if not title or not content:
+        return [TextContent(type="text", text="Error: title and content are required")]
+    
+    try:
+        prompt_service = PromptService(db)
+        
+        # Convert tag string to list if provided
+        tag_list = None
+        if tags:
+            tag_list = [tag.strip() for tag in tags.split(",")]
+        
+        # For MCP, we'll use a default user ID (1) - in a real scenario, this would come from authentication
+        prompt = prompt_service.create_prompt(
+            title=title,
+            content=content,
+            description=description,
+            category_name=category,
+            tag_names=tag_list,
+            is_public=is_public,
+            user_id=1  # Default user for MCP
+        )
+        
+        variables = _extract_variables(content)
+        
+        result = {
+            "success": True,
+            "message": "Prompt created successfully",
+            "prompt": {
+                "id": prompt.id,
+                "title": prompt.title,
+                "description": prompt.description,
+                "category": prompt.category.name if prompt.category else None,
+                "tags": [tag.name for tag in prompt.tags] if prompt.tags else [],
+                "is_public": prompt.is_public,
+                "variables": variables,
+                "statistics": {
+                    "characters": len(content),
+                    "words": len(content.split()),
+                    "estimated_tokens": len(content) // 4
+                }
+            }
+        }
+        
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"Create prompt error: {str(e)}")]
+
+
+async def _update_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
+    """Update an existing prompt."""
     prompt_id = arguments.get("prompt_id")
+    
     if not prompt_id:
         return [TextContent(type="text", text="Error: prompt_id is required")]
     
-    success = service.delete_prompt(prompt_id)
-    if success:
-        return [TextContent(type="text", text=f"Successfully deleted prompt with ID {prompt_id}")]
-    else:
-        return [TextContent(type="text", text=f"Prompt with ID {prompt_id} not found")]
+    try:
+        prompt_service = PromptService(db)
+        
+        # Get existing prompt
+        existing_prompt = prompt_service.get_prompt(prompt_id)
+        if not existing_prompt:
+            return [TextContent(type="text", text=f"Prompt with ID {prompt_id} not found")]
+        
+        # Prepare update data
+        update_data = {}
+        if "title" in arguments:
+            update_data["title"] = arguments["title"]
+        if "content" in arguments:
+            update_data["content"] = arguments["content"]
+        if "description" in arguments:
+            update_data["description"] = arguments["description"]
+        if "category" in arguments:
+            update_data["category_name"] = arguments["category"]
+        if "tags" in arguments:
+            tags = arguments["tags"]
+            update_data["tag_names"] = [tag.strip() for tag in tags.split(",")] if tags else []
+        if "is_public" in arguments:
+            update_data["is_public"] = arguments["is_public"]
+        
+        # Update prompt
+        prompt = prompt_service.update_prompt(prompt_id, **update_data)
+        
+        result = {
+            "success": True,
+            "message": "Prompt updated successfully",
+            "prompt": {
+                "id": prompt.id,
+                "title": prompt.title,
+                "description": prompt.description,
+                "category": prompt.category.name if prompt.category else None,
+                "tags": [tag.name for tag in prompt.tags] if prompt.tags else [],
+                "is_public": prompt.is_public
+            }
+        }
+        
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"Update prompt error: {str(e)}")]
 
 
-async def _list_categories(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """List all categories."""
-    service = CategoryService(db)
-    active_only = arguments.get("active_only", True)
+async def _delete_prompt(db, arguments: Dict[str, Any]) -> List[TextContent]:
+    """Delete a prompt by ID."""
+    prompt_id = arguments.get("prompt_id")
     
-    categories = service.get_categories(active_only=active_only)
+    if not prompt_id:
+        return [TextContent(type="text", text="Error: prompt_id is required")]
     
-    if not categories:
-        return [TextContent(type="text", text="No categories found")]
-    
-    result = [f"Found {len(categories)} categories:\n"]
-    for i, category in enumerate(categories, 1):
-        result.append(
-            f"{i}. **{category.name}** (ID: {category.id})\n"
-            f"   Description: {category.description or 'No description'}\n"
-            f"   Color: {category.color or 'None'} | Active: {'Yes' if category.is_active else 'No'}\n"
-        )
-    
-    return [TextContent(type="text", text="\n".join(result))]
+    try:
+        prompt_service = PromptService(db)
+        
+        # Check if prompt exists
+        existing_prompt = prompt_service.get_prompt(prompt_id)
+        if not existing_prompt:
+            return [TextContent(type="text", text=f"Prompt with ID {prompt_id} not found")]
+        
+        # Delete prompt
+        prompt_service.delete_prompt(prompt_id)
+        
+        result = {
+            "success": True,
+            "message": "Prompt deleted successfully",
+            "prompt_id": prompt_id
+        }
+        
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"Delete prompt error: {str(e)}")]
 
 
-async def _list_tags(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """List tags."""
-    service = TagService(db)
-    search = arguments.get("search")
-    popular = arguments.get("popular", False)
-    limit = arguments.get("limit", 20)
-    
-    if search:
-        tags = service.search_tags(search, limit)
-        result_text = f"Found {len(tags)} tags matching '{search}':\n"
-    elif popular:
-        tags_with_counts = service.get_popular_tags(limit)
-        result = [f"Top {len(tags_with_counts)} popular tags:\n"]
-        for i, tag_data in enumerate(tags_with_counts, 1):
-            result.append(
-                f"{i}. **{tag_data.name}** (used {tag_data.usage_count} times)\n"
-                f"   Description: {tag_data.description or 'No description'}\n"
-            )
-        return [TextContent(type="text", text="\n".join(result))]
-    else:
-        tags = service.get_tags()
-        result_text = f"Found {len(tags)} tags:\n"
-    
-    result = [result_text]
-    for i, tag in enumerate(tags, 1):
-        result.append(
-            f"{i}. **{tag.name}** (ID: {tag.id})\n"
-            f"   Description: {tag.description or 'No description'}\n"
-        )
-    
-    return [TextContent(type="text", text="\n".join(result))]
-
-
-async def _import_prompts(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Import prompts from content."""
-    service = ImportExportService(db)
-    
-    content = arguments.get("content")
-    format_type = arguments.get("format_type", "markdown")
-    title = arguments.get("title")
+async def _list_templates(db, arguments: Dict[str, Any]) -> List[TextContent]:
+    """List available prompt templates."""
     category = arguments.get("category")
     
-    if not content:
-        return [TextContent(type="text", text="Error: content is required")]
-    
     try:
-        imported_prompts, errors = service.import_prompts(
-            data=content,
-            format_type=format_type,
-            default_category=category,
-            skip_duplicates=True,
-        )
-        
-        result = [
-            f"Import completed:",
-            f"- Imported: {len(imported_prompts)} prompts",
-            f"- Errors: {len(errors)}",
+        # Predefined templates based on the reference implementation
+        templates = [
+            {
+                "id": "writing-assistant",
+                "name": "Writing Assistant",
+                "description": "Professional writing assistant for content creation",
+                "category": "writing",
+                "variables": ["role", "field", "task", "context", "requirement1", "requirement2"]
+            },
+            {
+                "id": "code-reviewer",
+                "name": "Code Reviewer", 
+                "description": "Expert code review and feedback system",
+                "category": "development",
+                "variables": ["language", "code_type", "code", "focus1", "focus2", "focus3"]
+            },
+            {
+                "id": "data-analyst",
+                "name": "Data Analysis",
+                "description": "Comprehensive data analysis and insights",
+                "category": "analysis",
+                "variables": ["data_type", "data", "goal1", "goal2", "goal3", "additional_request"]
+            },
+            {
+                "id": "customer-support",
+                "name": "Customer Support",
+                "description": "Professional customer service and support",
+                "category": "support",
+                "variables": ["company", "customer_issue", "customer_name", "account_type", "previous_contact", "response_goal1", "response_goal2", "response_goal3"]
+            },
+            {
+                "id": "marketing-copy",
+                "name": "Marketing Copy",
+                "description": "Persuasive marketing and sales content",
+                "category": "marketing",
+                "variables": ["content_type", "product_name", "target_audience", "benefit1", "benefit2", "benefit3", "usp", "cta", "tone", "length", "additional_requirements"]
+            },
+            {
+                "id": "educational-tutor",
+                "name": "Educational Tutor",
+                "description": "Personalized tutoring and explanation system",
+                "category": "education",
+                "variables": ["subject", "topic", "level", "learning_style", "question", "instruction1", "instruction2", "instruction3", "teaching_method", "examples_type"]
+            }
         ]
         
-        if errors:
-            result.append("\nErrors:")
-            for error in errors[:5]:  # Show first 5 errors
-                result.append(f"  - {error}")
+        # Filter by category if provided
+        if category:
+            templates = [t for t in templates if t["category"] == category]
         
-        if imported_prompts:
-            result.append("\nImported prompts:")
-            for prompt in imported_prompts[:10]:  # Show first 10
-                result.append(f"  - {prompt.title} (ID: {prompt.id})")
+        result = {
+            "templates": templates,
+            "count": len(templates)
+        }
         
-        return [TextContent(type="text", text="\n".join(result))]
-    
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
     except Exception as e:
-        return [TextContent(type="text", text=f"Error importing prompts: {str(e)}")]
+        return [TextContent(type="text", text=f"List templates error: {str(e)}")]
 
 
-async def _export_prompts(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Export prompts."""
-    service = ImportExportService(db)
+async def _get_user_info(db, arguments: Dict[str, Any]) -> List[TextContent]:
+    """Get user information and statistics."""
+    try:
+        prompt_service = PromptService(db)
+        
+        # For MCP, we'll use default user ID (1) - in a real scenario, this would come from authentication
+        user_id = 1
+        
+        # Get prompt counts
+        prompts = prompt_service.get_prompts_by_user(user_id)
+        total_prompts = len(prompts)
+        public_prompts = len([p for p in prompts if p.is_public])
+        private_prompts = total_prompts - public_prompts
+        
+        stats = {
+            "user": {
+                "id": user_id,
+                "name": "MCP User",
+                "email": "mcp@prombank.com"
+            },
+            "prompts": {
+                "total": total_prompts,
+                "public": public_prompts,
+                "private": private_prompts
+            },
+            "categories": len(set(p.category.name for p in prompts if p.category)),
+            "tags": len(set(tag.name for p in prompts for tag in p.tags))
+        }
+        
+        return [TextContent(type="text", text=json.dumps(stats, indent=2))]
+        
+    except Exception as e:
+        return [TextContent(type="text", text=f"Get user info error: {str(e)}")]
+
+
+async def _bulk_import(db, arguments: Dict[str, Any]) -> List[TextContent]:
+    """Bulk import prompts from content."""
+    source_type = arguments.get("source_type")
+    content = arguments.get("content")
+    pattern = arguments.get("pattern")
+    category = arguments.get("category")
     
-    format_type = arguments.get("format_type", "json")
-    prompt_ids = arguments.get("prompt_ids")
-    include_metadata = arguments.get("include_metadata", True)
+    if not source_type:
+        return [TextContent(type="text", text="Error: source_type is required")]
+    
+    if not content:
+        return [TextContent(type="text", text="Error: content is required for import")]
     
     try:
-        exported_data = service.export_prompts(
-            format_type=format_type,
-            prompt_ids=prompt_ids,
-            include_metadata=include_metadata,
-        )
+        import_export_service = ImportExportService(db)
         
-        return [TextContent(
-            type="text",
-            text=f"Exported prompts in {format_type} format:\n\n{exported_data}"
-        )]
-    
+        # Import prompts based on source type
+        if source_type == "markdown":
+            result = import_export_service.import_markdown(content, category)
+        elif source_type == "fabric":
+            result = import_export_service.import_fabric_pattern(content, category)
+        else:
+            return [TextContent(type="text", text=f"Unsupported source type: {source_type}")]
+        
+        return [TextContent(type="text", text=json.dumps(result, indent=2))]
+        
     except Exception as e:
-        return [TextContent(type="text", text=f"Error exporting prompts: {str(e)}")]
+        return [TextContent(type="text", text=f"Bulk import error: {str(e)}")]
 
 
-async def _get_popular_prompts(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Get popular prompts."""
-    service = PromptService(db)
-    limit = arguments.get("limit", 10)
+def _extract_variables(content: str) -> List[str]:
+    """Extract variables from prompt content (variables in {{variable}} format)."""
+    import re
     
-    prompts = service.get_popular_prompts(limit)
+    # Find all {{variable}} patterns
+    pattern = r'\{\{([^}]+)\}\}'
+    matches = re.findall(pattern, content)
     
-    if not prompts:
-        return [TextContent(type="text", text="No popular prompts found")]
-    
-    result = [f"Top {len(prompts)} popular prompts:\n"]
-    for i, prompt in enumerate(prompts, 1):
-        result.append(
-            f"{i}. **{prompt.title}** (ID: {prompt.id})\n"
-            f"   Used {prompt.usage_count} times | Type: {prompt.prompt_type.value}\n"
-            f"   Category: {prompt.category.name if prompt.category else 'None'}\n"
-        )
-    
-    return [TextContent(type="text", text="\n".join(result))]
+    # Return unique variables, trimmed
+    return list(set(match.strip() for match in matches))
 
 
-async def _get_recent_prompts(db, arguments: Dict[str, Any]) -> List[TextContent]:
-    """Get recent prompts."""
-    service = PromptService(db)
-    limit = arguments.get("limit", 10)
-    
-    prompts = service.get_recent_prompts(limit)
-    
-    if not prompts:
-        return [TextContent(type="text", text="No recent prompts found")]
-    
-    result = [f"Last {len(prompts)} created prompts:\n"]
-    for i, prompt in enumerate(prompts, 1):
-        result.append(
-            f"{i}. **{prompt.title}** (ID: {prompt.id})\n"
-            f"   Created: {prompt.created_at.strftime('%Y-%m-%d %H:%M')} | Type: {prompt.prompt_type.value}\n"
-            f"   Category: {prompt.category.name if prompt.category else 'None'}\n"
-        )
-    
-    return [TextContent(type="text", text="\n".join(result))]
+# Server startup
+def main():
+    """Main entry point for the MCP server."""
+    async def run_server():
+        async with stdio_server() as (read_stream, write_stream):
+            await app.run(
+                read_stream,
+                write_stream,
+                InitializationOptions(
+                    server_name="prombank-mcp",
+                    server_version="1.0.0",
+                    capabilities=app.get_capabilities(
+                        notification_options=None,
+                        experimental_capabilities=None,
+                    ),
+                ),
+            )
 
-
-# Resources (for future expansion)
-
-@app.list_resources()
-async def list_resources() -> List[Resource]:
-    """List available resources."""
-    return []
-
-
-@app.get_resource()
-async def get_resource(uri: AnyUrl) -> str:
-    """Get a specific resource."""
-    return "Resource not implemented yet"
-
-
-# Main server function
-
-async def main():
-    """Run the MCP server."""
     # Initialize database
     init_db()
     
-    logger.info("Starting Prombank MCP Server...")
-    
-    async with stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="prombank-mcp",
-                server_version="0.1.0",
-                capabilities=app.get_capabilities(
-                    notification_options=None,
-                    experimental_capabilities=None,
-                ),
-            ),
-        )
+    # Run the server
+    asyncio.run(run_server())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
